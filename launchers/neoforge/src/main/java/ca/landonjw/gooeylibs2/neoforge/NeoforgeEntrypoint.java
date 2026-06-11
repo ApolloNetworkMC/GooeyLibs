@@ -1,6 +1,6 @@
 /*
  * GooeyLibs
- * Copyright (C) 201x - 2024 landonjw
+ * Copyright (C) 201x - 2026 landonjw
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.util.Unit;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.javafmlmod.FMLModContainer;
@@ -66,7 +66,7 @@ public class NeoforgeEntrypoint {
         GooeyButton button = GooeyButton.builder()
                 .display(new ItemStack(Items.DIAMOND))
                 .with(DataComponents.CUSTOM_NAME, Component.literal("GooeyLibs Test").withColor(0x32a852))
-                .with(DataComponents.UNBREAKABLE, new Unbreakable(true))
+                .with(DataComponents.UNBREAKABLE, Unit.INSTANCE)
                 .onClick(() -> this.logger.info("Button click detected and executed"))
                 .build();
 
