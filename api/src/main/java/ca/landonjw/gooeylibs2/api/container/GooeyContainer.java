@@ -44,7 +44,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -112,14 +112,14 @@ public class GooeyContainer extends AbstractContainerMenu {
         if (inventoryTemplate == null) {
             // Sets the slots for the main inventory.
             for (int i = 9; i < 36; i++) {
-                final GooeyButton button = GooeyButton.of(player.getInventory().items.get(i));
+                final GooeyButton button = GooeyButton.of(player.getInventory().getNonEquipmentItems().get(i));
                 final TemplateSlotDelegate delegate = new TemplateSlotDelegate(button, i - 9);
                 addSlot(new TemplateSlot(this.container, delegate, 0, 0));
                 this.container.setItem(slotIndex++, button.getDisplay());
             }
             // Sets the slots for the hotbar.
             for (int i = 0; i < 9; i++) {
-                final GooeyButton button = GooeyButton.of(player.getInventory().items.get(i));
+                final GooeyButton button = GooeyButton.of(player.getInventory().getNonEquipmentItems().get(i));
                 final TemplateSlotDelegate delegate = new TemplateSlotDelegate(button, i + 27);
 
                 addSlot(new TemplateSlot(this.container, delegate, 0, 0));
@@ -213,11 +213,11 @@ public class GooeyContainer extends AbstractContainerMenu {
         this.setPlayersCursor(ItemStack.EMPTY);
     }
 
-    private void patchDesyncs(int slot, ClickType clickType) {
-        if (clickType == ClickType.PICKUP || clickType == ClickType.CLONE || clickType == ClickType.THROW) {
+    private void patchDesyncs(int slot, ContainerInput clickType) {
+        if (clickType == ContainerInput.PICKUP || clickType == ContainerInput.CLONE || clickType == ContainerInput.THROW) {
             updateSlotStack(getTemplateIndex(slot), getItemAtSlot(slot), isSlotInPlayerInventory(slot));
         }
-        else if (clickType == ClickType.QUICK_MOVE || clickType == ClickType.PICKUP_ALL) {
+        else if (clickType == ContainerInput.QUICK_MOVE || clickType == ContainerInput.PICKUP_ALL) {
             updateAllContainerContents();
         }
     }
@@ -228,7 +228,7 @@ public class GooeyContainer extends AbstractContainerMenu {
     }
 
     @Override
-    public void clicked(int slot, int dragType, @NotNull ClickType type, @NotNull Player player) {
+    public void clicked(int slot, int dragType, @NotNull ContainerInput type, @NotNull Player player) {
         // Don't do anything if user is only clicking edge of UI.
         if (slot == -1 || slot == -999) {
             if (cursorButton != null) {
@@ -246,7 +246,7 @@ public class GooeyContainer extends AbstractContainerMenu {
          */
         Slot target = this.slots.get(slot);
         if (this.lastClickTick == this.server.getTickCount()) {
-            if (type == ClickType.PICKUP) {
+            if (type == ContainerInput.PICKUP) {
                 if (this.cursorButton != null) {
                     ItemStack clickedItem = getItemAtSlot(slot);
                     ItemStack cursorItem = this.cursorButton.getDisplay();
@@ -265,7 +265,7 @@ public class GooeyContainer extends AbstractContainerMenu {
         }
         this.lastClickTick = this.server.getTickCount();
 
-        if (type == ClickType.QUICK_CRAFT && dragType == 8) {
+        if (type == ContainerInput.QUICK_CRAFT && dragType == 8) {
             /*
              * If the user middle clicks and drags, this refreshes the container at the end of the tick.
              * This is done because the click type propagates with the drag, yet does not always have a
@@ -296,7 +296,7 @@ public class GooeyContainer extends AbstractContainerMenu {
         // Interacting with non-movable button, force empty cursor
         setPlayersCursor(ItemStack.EMPTY);
 
-        if (type == ClickType.SWAP) {
+        if (type == ContainerInput.SWAP) {
             // During a swap, the drag type variable is used for the target swap slot
             ItemStack inventory = this.player.getInventory().getItem(dragType);
 
@@ -304,19 +304,19 @@ public class GooeyContainer extends AbstractContainerMenu {
             updateSlotStack(slot, this.getItemAtSlot(slot), false);
         }
 
-        if (type == ClickType.QUICK_CRAFT) {
+        if (type == ContainerInput.QUICK_CRAFT) {
             updateSlotStack(getTemplateIndex(slot), ItemStack.EMPTY, isSlotInPlayerInventory(slot));
             return;
         }
 
-        ButtonClick buttonClickType = getButtonClickType(type, dragType);
+        ButtonClick buttonContainerInput = getButtonContainerInput(type, dragType);
         if (button != null) {
-            ButtonAction action = new ButtonAction(this.player, buttonClickType, button, page.getTemplate(), page, slot);
+            ButtonAction action = new ButtonAction(this.player, buttonContainerInput, button, page.getTemplate(), page, slot);
             button.onClick(action);
         }
     }
 
-    private ButtonClick getButtonClickType(ClickType type, int dragType) {
+    private ButtonClick getButtonContainerInput(ContainerInput type, int dragType) {
         return switch (type) {
             case PICKUP -> (dragType == 0) ? ButtonClick.LEFT_CLICK : ButtonClick.RIGHT_CLICK;
             case CLONE -> ButtonClick.MIDDLE_CLICK;
@@ -326,24 +326,24 @@ public class GooeyContainer extends AbstractContainerMenu {
         };
     }
 
-    private void handleMovableButton(int slot, int dragType, ClickType clickType) {
+    private void handleMovableButton(int slot, int dragType, ContainerInput clickType) {
         /*
          * This prevents a desync with dragging an item.
          * Quick crafts begin and end with a click on slot -999,
          * we want to ignore those calls.
          */
-        if (clickType == ClickType.QUICK_CRAFT && slot == -999) {
+        if (clickType == ContainerInput.QUICK_CRAFT && slot == -999) {
             return;
         }
 
         Template template = getTemplateFromIndex(slot);
 
         if (template == null) {
-            if (clickType == ClickType.PICKUP && isSlotOccupied(slot)) {
+            if (clickType == ContainerInput.PICKUP && isSlotOccupied(slot)) {
                 setPlayersCursor((cursorButton != null) ? cursorButton.getDisplay() : ItemStack.EMPTY);
                 return;
             }
-            if (clickType == ClickType.QUICK_CRAFT) {
+            if (clickType == ContainerInput.QUICK_CRAFT) {
                 this.updateAllContainerContents();
             }
             if (cursorButton != null) {
@@ -360,7 +360,7 @@ public class GooeyContainer extends AbstractContainerMenu {
         }
     }
 
-    private void onMovablePickup(int slot, int dragType, ClickType clickType) {
+    private void onMovablePickup(int slot, int dragType, ContainerInput clickType) {
         Template template = getTemplateFromIndex(slot);
         int targetTemplateSlot = getTemplateIndex(slot);
         Button clickedButton = getButton(slot);
@@ -372,12 +372,12 @@ public class GooeyContainer extends AbstractContainerMenu {
         if (clickedButton == null) {
             return;
         }
-        if (clickType == ClickType.QUICK_CRAFT && dragType == 9) {
+        if (clickType == ContainerInput.QUICK_CRAFT && dragType == 9) {
             setPlayersCursor(ItemStack.EMPTY);
             return;
         }
 
-        ButtonClick click = getButtonClickType(clickType, dragType);
+        ButtonClick click = getButtonContainerInput(clickType, dragType);
         MovableButtonAction action = new MovableButtonAction(player, click, clickedButton, page.getTemplate(), page, slot);
         clickedButton.onClick(action);
         ((Movable) clickedButton).onPickup(action);
@@ -391,18 +391,18 @@ public class GooeyContainer extends AbstractContainerMenu {
             setButton(slot, null);
 
             // Clone needs to return empty ItemStack or it desyncs.
-            if (clickType == ClickType.CLONE || clickType == ClickType.QUICK_MOVE || clickType == ClickType.THROW) {
+            if (clickType == ContainerInput.CLONE || clickType == ContainerInput.QUICK_MOVE || clickType == ContainerInput.THROW) {
                 setPlayersCursor(cursorButton.getDisplay());
             }
         }
     }
 
-    private void onMovableDrop(int slot, int dragType, ClickType clickType) {
+    private void onMovableDrop(int slot, int dragType, ContainerInput clickType) {
         Template template = getTemplateFromIndex(slot);
         int targetTemplateSlot = getTemplateIndex(slot);
 
         // This prevents a desync on double clicking when dropping
-        if (clickType == ClickType.PICKUP_ALL || slot == -999) {
+        if (clickType == ContainerInput.PICKUP_ALL || slot == -999) {
             setPlayersCursor(cursorButton.getDisplay());
             return;
         }
@@ -418,29 +418,29 @@ public class GooeyContainer extends AbstractContainerMenu {
              * collisions when trying to drop. Quick move wants a return type of an empty ItemStack,
              * so this guarantees it, otherwise there will be a desync.
              */
-            if (clickType == ClickType.QUICK_MOVE || clickType == ClickType.CLONE || clickType == ClickType.THROW) {
+            if (clickType == ContainerInput.QUICK_MOVE || clickType == ContainerInput.CLONE || clickType == ContainerInput.THROW) {
                 this.resetQuickCraft();
                 return;
             }
-            else if (clickType == ClickType.QUICK_CRAFT) {
+            else if (clickType == ContainerInput.QUICK_CRAFT) {
                 updateSlotStack(getTemplateIndex(slot), getItemAtSlot(slot), isSlotInPlayerInventory(slot));
                 return;
             }
         }
-        ButtonClick click = getButtonClickType(clickType, dragType);
+        ButtonClick click = getButtonContainerInput(clickType, dragType);
         MovableButtonAction action = new MovableButtonAction(player, click, cursorButton, page.getTemplate(), page, slot);
         cursorButton.onClick(action);
         ((Movable) cursorButton).onDrop(action);
 
         if (action.isCancelled()) {
             // Clone needs to return empty ItemStack or it desyncs.
-            if (clickType == ClickType.CLONE) {
+            if (clickType == ContainerInput.CLONE) {
                 return;
             }
 
             setPlayersCursor(cursorButton == null ? ItemStack.EMPTY : cursorButton.getDisplay());
             updateSlotStack(targetTemplateSlot, original == null ? ItemStack.EMPTY : original.getDisplay(), template instanceof InventoryTemplate);
-            if (clickType == ClickType.QUICK_CRAFT) {
+            if (clickType == ContainerInput.QUICK_CRAFT) {
                 this.updateAllContainerContents();
             }
         }
@@ -448,7 +448,7 @@ public class GooeyContainer extends AbstractContainerMenu {
             setButton(slot, cursorButton);
             setCarriedButton(null);
 
-            if (clickType == ClickType.QUICK_CRAFT) {
+            if (clickType == ContainerInput.QUICK_CRAFT) {
                 this.updateAllContainerContents();
                 this.setPlayersCursor(ItemStack.EMPTY);
             }
