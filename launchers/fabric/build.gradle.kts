@@ -19,7 +19,7 @@ dependencies {
     ).forEach { implementation(fabricApi.module(it, "0.151.0+26.1.2")) }
 
     // API Inclusion
-    api(project(":launchers:fabric:api-repack", configuration = "namedElements"))
+    api(projects.launchers.fabric.apiRepack)
     include(projects.launchers.fabric.apiRepack)
 }
 
