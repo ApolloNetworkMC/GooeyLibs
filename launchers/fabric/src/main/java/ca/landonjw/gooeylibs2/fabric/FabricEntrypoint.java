@@ -29,7 +29,7 @@ import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
@@ -38,7 +38,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,7 @@ public final class FabricEntrypoint implements ModInitializer {
             GooeyButton button = GooeyButton.builder()
                     .display(new ItemStack(Items.DIAMOND))
                     .with(DataComponents.CUSTOM_NAME, Component.literal("GooeyLibs Test").withColor(0x32a852))
-                    .with(DataComponents.UNBREAKABLE, new Unbreakable(true))
+                    .with(DataComponents.UNBREAKABLE, Unit.INSTANCE)
                     .onClick(() -> this.logger.info("Button click detected and executed"))
                     .build();
 
@@ -98,10 +98,10 @@ public final class FabricEntrypoint implements ModInitializer {
                                         .then(Commands.literal("linked")
                                                 .executes(context -> {
                                                     ServerPlayer source = context.getSource().getPlayerOrException();
-                                                    MinecraftServer server = source.server;
+                                                    MinecraftServer server = source.getServer();
 
-                                                    FabricServerAudiences audiences = FabricServerAudiences.of(server);
-                                                    LinkedPage linked = new LinkedPage(template, null, audiences.toNative(adventure), null, null, null, null);
+                                                    MinecraftServerAudiences audiences = MinecraftServerAudiences.of(server);
+                                                    LinkedPage linked = new LinkedPage(template, null, audiences.asNative(adventure), null, null, null, null);
                                                     UIManager.openUIForcefully(source, linked);
 
                                                     return 0;
