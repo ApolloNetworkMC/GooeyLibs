@@ -15,7 +15,8 @@ dependencies {
 
     setOf(
         "fabric-lifecycle-events-v1",
-        "fabric-command-api-v2"
+        "fabric-command-api-v2",
+        "fabric-networking-api-v1"
     ).forEach { implementation(fabricApi.module(it, "0.151.0+26.1.2")) }
 
     // API Inclusion
