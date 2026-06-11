@@ -98,7 +98,7 @@ public final class FabricEntrypoint implements ModInitializer {
                                         .then(Commands.literal("linked")
                                                 .executes(context -> {
                                                     ServerPlayer source = context.getSource().getPlayerOrException();
-                                                    MinecraftServer server = source.getServer();
+                                                    MinecraftServer server = source.level().getServer();
 
                                                     MinecraftServerAudiences audiences = MinecraftServerAudiences.of(server);
                                                     LinkedPage linked = new LinkedPage(template, null, audiences.asNative(adventure), null, null, null, null);
