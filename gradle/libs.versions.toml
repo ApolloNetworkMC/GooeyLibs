@@ -1,5 +1,5 @@
 [plugins]
-loom = "net.fabricmc.fabric-loom:1.17"
+loom = "net.fabricmc.fabric-loom:1.17.8"
 indra = { id = "net.kyori.indra" }
 
 [versions]
