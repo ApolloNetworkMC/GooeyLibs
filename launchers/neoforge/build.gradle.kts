@@ -40,12 +40,9 @@ modrinth {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("neoforge") {
-            from(components["java"])
-            groupId = "ca.landonjw.gooeylibs"
-            artifactId = "neoforge"
-            version = rootProject.version.toString()
-        }
+    publications.withType<MavenPublication>().configureEach {
+        groupId = "ca.landonjw.gooeylibs"
+        artifactId = "neoforge"
+        version = rootProject.version.toString()
     }
 }

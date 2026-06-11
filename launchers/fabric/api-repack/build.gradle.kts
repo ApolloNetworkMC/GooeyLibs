@@ -34,12 +34,9 @@ tasks {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("fabric-api-repack") {
-            from(components["java"])
-            groupId = "ca.landonjw.gooeylibs"
-            artifactId = "fabric-api-repack"
-            version = rootProject.version.toString()
-        }
+    publications.withType<MavenPublication>().configureEach {
+        groupId = "ca.landonjw.gooeylibs"
+        artifactId = "fabric-api-repack"
+        version = rootProject.version.toString()
     }
 }

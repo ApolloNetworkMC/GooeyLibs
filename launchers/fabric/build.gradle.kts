@@ -41,13 +41,10 @@ tasks {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("fabric") {
-            from(components["java"])
-            groupId = "ca.landonjw.gooeylibs"
-            artifactId = "fabric"
-            version = rootProject.version.toString()
-        }
+    publications.withType<MavenPublication>().configureEach {
+        groupId = "ca.landonjw.gooeylibs"
+        artifactId = "fabric"
+        version = rootProject.version.toString()
     }
 }
 

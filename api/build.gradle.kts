@@ -53,12 +53,9 @@ tasks {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("api") {
-            from(components["java"])
-            groupId = "ca.landonjw.gooeylibs"
-            artifactId = "api"
-            version = rootProject.version.toString()
-        }
+    publications.withType<MavenPublication>().configureEach {
+        groupId = "ca.landonjw.gooeylibs"
+        artifactId = "api"
+        version = rootProject.version.toString()
     }
 }
