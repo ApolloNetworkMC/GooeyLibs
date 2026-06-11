@@ -1,7 +1,7 @@
 plugins {
     `java-library`
 
-    id("org.cadixdev.licenser")
+    id("net.neoforged.licenser")
 
     id("net.kyori.indra")
     id("net.kyori.indra.git")
